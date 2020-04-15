@@ -1,7 +1,6 @@
 package api.controller
 
-import com.meetAt.config.mainModule
-import io.ktor.application.Application
+import com.meetAt.module
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
@@ -14,7 +13,7 @@ class AuthControllerTest {
     @KtorExperimentalAPI
     @Test
     fun testGet() {
-        withTestApplication(Application::mainModule) {
+        withTestApplication({ module(testing = true) }) {
             handleRequest(HttpMethod.Get, "/get").apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals("Called auth gateway!", response.content)

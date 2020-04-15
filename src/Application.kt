@@ -1,12 +1,17 @@
 package com.meetAt
 
-import com.meetAt.config.setup
-import io.ktor.server.engine.EngineAPI
-import io.ktor.util.KtorExperimentalAPI
+import com.meetAt.api.auth
+import com.meetAt.api.controller.AuthController
+import io.ktor.application.*
+import io.ktor.routing.*
 
-@KtorExperimentalAPI
-@EngineAPI
-fun main() {
-    setup().start(wait = true)
+fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+
+@Suppress("unused") // Referenced in application.conf
+@kotlin.jvm.JvmOverloads
+fun Application.module(testing: Boolean = false) {
+    install(Routing) {
+        auth(AuthController())
+    }
 }
 
