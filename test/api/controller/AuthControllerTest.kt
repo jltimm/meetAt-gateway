@@ -1,6 +1,6 @@
 package api.controller
 
-import com.meetAt.api.model.CreateLogin
+import com.meetAt.api.model.CreateLoginRequest
 import com.meetAt.module
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -11,7 +11,7 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
 import io.ktor.util.KtorExperimentalAPI
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AuthControllerTest {
@@ -46,13 +46,14 @@ class AuthControllerTest {
     fun testCreate() {
         withTestApplication({
             (environment.config as MapApplicationConfig).apply {
-                put("ktor.service.authUrl", "http://localhost:8082/v1/logins/")
+                put("ktor.service.authUrl", "http://localhost:8082/v1/")
+                put("ktor.service.locationUrl", "http://localhost:8081/v1/")
             }
             module(client = createMockedClient())
         }) {
-            handleRequest(HttpMethod.Post, "/create") {
+            handleRequest(HttpMethod.Post, "/logins/create") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(CreateLogin("test", "test", "test").toJson())
+                setBody(CreateLoginRequest("test", "test", "test").toJson())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals("{\"msg\":\"User created successfully\"}", response.content)
