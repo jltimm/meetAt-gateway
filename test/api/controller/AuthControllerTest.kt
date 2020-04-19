@@ -1,22 +1,61 @@
 package api.controller
 
+import com.meetAt.api.model.CreateLogin
 import com.meetAt.module
-import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.config.MapApplicationConfig
+import io.ktor.http.*
 import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
 import io.ktor.util.KtorExperimentalAPI
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class AuthControllerTest {
+
+    private val Url.hostWithPortIfRequired: String get() = if (port == protocol.defaultPort) host else hostWithPort
+    private val Url.fullUrl: String get() = "${protocol.name}://$hostWithPortIfRequired$fullPath"
+
+    private fun createMockedClient(): HttpClient {
+        return HttpClient(MockEngine) {
+            engine {
+                addHandler { request ->
+                    when (request.url.fullUrl) {
+                        "http://localhost:8082/v1/logins/create" -> {
+                            // handle post
+                            when (request.method) {
+                                HttpMethod.Post -> {
+                                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                                    respond("{\"msg\":\"User created successfully\"}", headers = responseHeaders)
+                                }
+                                else -> error("Unhandled")
+                            }
+                        }
+                        else -> error("Unhandled ${request.url.fullUrl}")
+                    }
+                }
+            }
+        }
+    }
+
     @KtorExperimentalAPI
     @Test
-    fun testGet() {
-        withTestApplication({ module(testing = true) }) {
-            handleRequest(HttpMethod.Get, "/get").apply {
+    fun testCreate() {
+        withTestApplication({
+            (environment.config as MapApplicationConfig).apply {
+                put("ktor.service.authUrl", "http://localhost:8082/v1/logins/")
+            }
+            module(client = createMockedClient())
+        }) {
+            handleRequest(HttpMethod.Post, "/create") {
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(CreateLogin("test", "test", "test").toJson())
+            }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
-                assertEquals("Called auth gateway!", response.content)
+                assertEquals("{\"msg\":\"User created successfully\"}", response.content)
             }
         }
     }
