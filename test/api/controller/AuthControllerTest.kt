@@ -43,7 +43,7 @@ class AuthControllerTest {
 
     @KtorExperimentalAPI
     @Test
-    fun testCreate() {
+    fun testCreateLogin() {
         withTestApplication({
             (environment.config as MapApplicationConfig).apply {
                 put("ktor.service.authUrl", "http://localhost:8082/v1/")

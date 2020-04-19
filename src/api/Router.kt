@@ -10,13 +10,22 @@ import io.ktor.util.KtorExperimentalAPI
 
 @KtorExperimentalAPI
 fun Routing.auth(authController: AuthController) {
-    route("/logins/create") {
-        post { authController.create(this.context) }
+    route("logins") {
+        route("create") {
+            post { authController.create(this.context) }
+        }
     }
 }
 
 fun Routing.location(locationController: LocationController) {
-    route("/nearby/nearby_locations") {
-        get { locationController.getNearByLocationsFromCoordinates(this.context) }
+    route("nearby") {
+        route("nearby_locations") {
+            get { locationController.getNearByLocationsFromCoordinates(this.context) }
+        }
+    }
+    route("locations") {
+        route("center") {
+            get { locationController.getCenter(this.context) }
+        }
     }
 }
