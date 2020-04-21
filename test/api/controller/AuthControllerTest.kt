@@ -1,6 +1,6 @@
 package api.controller
 
-import com.meetAt.api.model.CreateLoginRequest
+import com.meetAt.api.model.AuthRequest
 import com.meetAt.module
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -24,12 +24,20 @@ class AuthControllerTest {
             engine {
                 addHandler { request ->
                     when (request.url.fullUrl) {
-                        "http://localhost:8082/v1/logins/create" -> {
-                            // handle post
+                        "http://localhost:8082/v1/auth/create" -> {
                             when (request.method) {
                                 HttpMethod.Post -> {
                                     val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                                     respond("{\"msg\":\"User created successfully\"}", headers = responseHeaders)
+                                }
+                                else -> error("Unhandled")
+                            }
+                        }
+                        "http://localhost:8082/v1/auth/login" -> {
+                            when (request.method) {
+                                HttpMethod.Post -> {
+                                    val responseHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                                    respond("{\"id\":\"0f3f98f8d4a30e74126311e332e8fc01\"}", headers = responseHeaders)
                                 }
                                 else -> error("Unhandled")
                             }
@@ -43,7 +51,7 @@ class AuthControllerTest {
 
     @KtorExperimentalAPI
     @Test
-    fun testCreateLogin() {
+    fun testAuthClient() {
         withTestApplication({
             (environment.config as MapApplicationConfig).apply {
                 put("ktor.service.authUrl", "http://localhost:8082/v1/")
@@ -51,12 +59,19 @@ class AuthControllerTest {
             }
             module(client = createMockedClient())
         }) {
-            handleRequest(HttpMethod.Post, "/logins/create") {
+            handleRequest(HttpMethod.Post, "/auth/create") {
                 addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(CreateLoginRequest("test", "test", "test").toJson())
+                setBody(AuthRequest("test", "test", "test").toJson())
             }.apply {
                 assertEquals(HttpStatusCode.OK, response.status())
                 assertEquals("{\"msg\":\"User created successfully\"}", response.content)
+            }
+            handleRequest(HttpMethod.Post, "/auth/login") {
+                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(AuthRequest("test", "test", "test").toJson())
+            }.apply {
+                assertEquals(HttpStatusCode.OK, response.status())
+                assertEquals("{\"id\":\"0f3f98f8d4a30e74126311e332e8fc01\"}", response.content)
             }
         }
     }

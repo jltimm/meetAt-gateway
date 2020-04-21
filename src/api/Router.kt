@@ -10,9 +10,12 @@ import io.ktor.util.KtorExperimentalAPI
 
 @KtorExperimentalAPI
 fun Routing.auth(authController: AuthController) {
-    route("logins") {
+    route("auth") {
         route("create") {
             post { authController.create(this.context) }
+        }
+        route("login") {
+            post { authController.login(this.context) }
         }
     }
 }
