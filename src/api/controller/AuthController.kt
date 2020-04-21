@@ -14,6 +14,6 @@ class AuthController(private val authService: AuthService) {
     suspend fun create(ctx: ApplicationCall) {
         val body = ctx.receive<CreateLoginRequest>()
         val response = authService.createLogin(body)
-        ctx.respondText(response.readText(), ContentType.Application.Json)
+        ctx.respondText(response.readText(), ContentType.Application.Json, response.status)
     }
 }

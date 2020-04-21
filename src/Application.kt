@@ -21,7 +21,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @KtorExperimentalAPI
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
-fun Application.module(client: HttpClient = HttpClient(CIO)) {
+fun Application.module(client: HttpClient = HttpClient(CIO) { expectSuccess = false }) {
     val authService = AuthService(environment.config.property("ktor.service.authUrl").getString(), client)
     val locationService = LocationService(environment.config.property("ktor.service.locationUrl").getString(), client)
     install(Routing) {

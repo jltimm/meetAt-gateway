@@ -13,11 +13,11 @@ class LocationController(private val locationService: LocationService) {
     suspend fun getNearByLocationsFromCoordinates(ctx: ApplicationCall) {
         val body = ctx.receive<LatLngRequest>()
         val response = locationService.getNearByLocations(body)
-        ctx.respondText(response.readText(), ContentType.Application.Json)
+        ctx.respondText(response.readText(), ContentType.Application.Json, response.status)
     }
     suspend fun getCenter(ctx: ApplicationCall) {
         val body = ctx.receive<CenterRequest>()
         val response = locationService.getCenter(body)
-        ctx.respondText(response.readText(), ContentType.Application.Json)
+        ctx.respondText(response.readText(), ContentType.Application.Json, response.status)
     }
 }
